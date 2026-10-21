@@ -24,11 +24,18 @@ Proposal ──► Review ──► Guide allocation ──► Milestones ──
 
 Project **health** is computed from milestone deadlines: *On track*, *At risk* (an open milestone is due within 7 days) or *Delayed* (an open milestone is overdue). Every action is written to the project's activity log and notifies the people involved.
 
-## Dashboards
+## How the interface works
 
-- **Student:** next-step guidance, status, progress, guide, next deadline, milestone timeline with upload buttons, latest feedback, activity.
-- **Faculty:** to-do queue (proposals, submissions to review, final evaluations), active projects with health and progress, upcoming deadlines.
-- **Coordinator:** department stats, projects by stage, health of in-progress projects, guide workload, projects needing attention, recent activity, CSV export, user management.
+Every screen is built around three ideas:
+
+1. **"Your next step" card**: the top of every home and project page says, in plain words, the one thing to do now, with a single button to do it.
+2. **Journey tracker**: a 6-step progress line (Proposal → Approval → Guide assigned → Milestones → Final submission → Graded) marks where the project is ("You are here") and explains what happens at that step.
+3. **Plain-language labels**: *Waiting for approval*, *Needs changes*, *Deadline soon*, *Overdue*, *Done*, always shown as text plus an icon.
+
+- **Student home:** next step, journey, milestones (click one to see its files and feedback), your guide, latest feedback. The proposal form is a 4-step wizard: idea → plan → guide → check & send.
+- **Faculty home:** a "Waiting for you" to-do list grouped into *Proposals to decide*, *Work to review* and *Projects to grade*, plus your students, upcoming deadlines and what each label means. The menu shows live counts.
+- **Coordinator home:** "Needs your attention" first (proposals, projects needing a guide, overdue work, grading), then a 5-stage pipeline of where projects are, project health, guide workload and recent activity.
+- **How it works:** a guide in the sidebar (shown automatically on first visit) explains the whole process and marks which steps are yours.
 
 ## Running it
 

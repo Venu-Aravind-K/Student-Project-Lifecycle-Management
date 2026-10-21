@@ -72,7 +72,7 @@ router.post('/', authenticate, uploadSingle, async (req, res) => {
                        VALUES (?, NULL, ?, ?, ?, ?, ?, ?)`,
                 [project.id, req.user.id, docType, file.originalname, file.filename, file.size, comments]);
             await wf.logActivity(project.id, req.user.id, `Uploaded document "${file.originalname}"`);
-            await wf.notify(isOwner ? project.guide_id : project.student_id, `${req.user.name} uploaded "${file.originalname}"`, `${link}#documents`);
+            await wf.notify(isOwner ? project.guide_id : project.student_id, `${req.user.name} uploaded "${file.originalname}"`, `${link}#files`);
         }
         await wf.touchProject(project.id);
         res.status(201).json({ message: 'Uploaded successfully' });

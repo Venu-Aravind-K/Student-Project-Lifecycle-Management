@@ -316,7 +316,7 @@ async function seed() {
     await addSubmission(p9, null, 'hank', { file: 'final-report-smart-attendance.pdf', docTitle: 'Final Project Report', lines: ['Smart Attendance using Face Recognition – final report.', 'Accuracy 96.2% across two classrooms.'], day: -1, docType: 'FINAL_REPORT' });
     await log(p9, 'hank', 'Uploaded document "final-report-smart-attendance.pdf"', -1, 17);
     await log(p9, 'hank', 'Made final submission for evaluation', -1, 18);
-    await notify('kumar', 'Hank Green made the final submission for "Smart Attendance using Face Recognition" – ready for evaluation', `/project-details.html?id=${p9}#evaluation`, -1);
+    await notify('kumar', 'Hank Green made the final submission for "Smart Attendance using Face Recognition" – ready for evaluation', `/project-details.html?id=${p9}#grade`, -1);
 
     // Ivy Chen has no project yet – use her account to try the proposal flow from scratch.
     await notify('admin', 'New proposal from Bob Jones: "Blockchain-Based Student Election System"', `/project-details.html?id=${p3}`, -2);

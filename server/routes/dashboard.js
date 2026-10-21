@@ -7,6 +7,29 @@ const router = express.Router();
 
 router.use(authenticate);
 
+// Small counts for sidebar badges ("things waiting for you")
+router.get('/counts', async (req, res) => {
+    const { id, role } = req.user;
+    if (role === 'STUDENT') return res.json({});
+    const latestPending = `pr.status = 'SUBMITTED' AND pr.version = (SELECT MAX(version) FROM proposals WHERE project_id = pr.project_id)`;
+    if (role === 'FACULTY') {
+        const [proposals, reviews, evaluations] = await Promise.all([
+            get(`SELECT COUNT(*) AS n FROM proposals pr JOIN projects p ON p.id = pr.project_id
+                 WHERE ${latestPending} AND (p.guide_id = ? OR (p.guide_id IS NULL AND p.preferred_guide_id = ?))`, [id, id]),
+            get(`SELECT COUNT(*) AS n FROM milestones m JOIN projects p ON p.id = m.project_id
+                 WHERE m.status = 'SUBMITTED' AND p.status = 'IN_PROGRESS' AND p.guide_id = ?`, [id]),
+            get(`SELECT COUNT(*) AS n FROM projects WHERE status = 'FINAL_SUBMISSION' AND guide_id = ?`, [id]),
+        ]);
+        return res.json({ proposals: proposals.n, reviews: reviews.n, evaluations: evaluations.n });
+    }
+    const [proposals, allocation, evaluations] = await Promise.all([
+        get(`SELECT COUNT(*) AS n FROM proposals pr WHERE ${latestPending}`),
+        get(`SELECT COUNT(*) AS n FROM projects WHERE status = 'APPROVED'`),
+        get(`SELECT COUNT(*) AS n FROM projects WHERE status = 'FINAL_SUBMISSION'`),
+    ]);
+    res.json({ proposals: proposals.n, allocation: allocation.n, evaluations: evaluations.n });
+});
+
 router.get('/student', requireRole('STUDENT'), async (req, res) => {
     const project = await get(`${wf.PROJECT_SELECT} WHERE p.student_id = ? ORDER BY p.id DESC LIMIT 1`, [req.user.id]);
     res.json({ detail: project ? await buildDetail(req.user, project) : null });

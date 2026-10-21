@@ -254,7 +254,7 @@ router.post('/:id/final-submit', requireRole('STUDENT'), async (req, res) => {
     await wf.touchProject(project.id, { status: 'FINAL_SUBMISSION', final_submitted_at: wf.nowStamp() });
     await wf.logActivity(project.id, req.user.id, 'Made final submission for evaluation');
     await wf.notify(project.guide_id, `${project.student_name} made the final submission for "${project.title}" – ready for evaluation`,
-        `/project-details.html?id=${project.id}#evaluation`);
+        `/project-details.html?id=${project.id}#grade`);
     res.json({ message: 'Final submission complete – your guide has been notified' });
 });
 
@@ -275,7 +275,7 @@ router.post('/:id/evaluation', async (req, res) => {
             scores.presentation, scores.viva, total, grade, comments]);
     await wf.touchProject(project.id, { status: 'COMPLETED' });
     await wf.logActivity(project.id, req.user.id, `Final evaluation: ${total}/100 (grade ${grade}) – project completed`);
-    await wf.notify(project.student_id, `Your project has been evaluated: ${total}/100, grade ${grade}`, `/project-details.html?id=${project.id}#evaluation`);
+    await wf.notify(project.student_id, `Your project has been evaluated: ${total}/100, grade ${grade}`, `/project-details.html?id=${project.id}#grade`);
     res.json({ message: `Evaluation saved – ${total}/100, grade ${grade}`, total, grade });
 });
 
