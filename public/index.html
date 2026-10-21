@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in · ProjectFlow</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232a78d6'/%3E%3Cpath d='M6 6h5v5H6zM13 13h5v5h-5z' fill='white'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/app.css">
+    <script src="js/app.js"></script>
+</head>
+<body>
+    <div class="auth">
+        <section class="auth-hero">
+            <div class="brand"><span class="brand-mark" id="logo"></span>ProjectFlow</div>
+            <div>
+                <h1>Every student project, from proposal to final grade.</h1>
+                <p>One place for students, guides and coordinators to track proposals, guide allocation, milestones, reviews, documentation and final evaluation.</p>
+            </div>
+            <ol class="flow">
+                <li><b>01</b>Proposal &amp; review</li>
+                <li><b>02</b>Guide allocation</li>
+                <li><b>03</b>Milestones</li>
+                <li><b>04</b>Submissions &amp; docs</li>
+                <li><b>05</b>Milestone reviews</li>
+                <li><b>06</b>Final evaluation</li>
+            </ol>
+        </section>
+
+        <section class="auth-panel">
+            <div class="auth-card">
+                <!-- Sign in -->
+                <form id="login-form" class="stack" novalidate>
+                    <div>
+                        <h1>Sign in</h1>
+                        <p class="muted" style="margin-top:4px">Welcome back. Use your institutional email.</p>
+                    </div>
+                    <div class="form-error hidden" id="login-error" role="alert"></div>
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input class="input" id="email" name="email" type="email" autocomplete="username" required>
+                    </div>
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+                    </div>
+                    <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+                    <p class="small muted" style="text-align:center">New student? <a href="#" id="show-register">Create an account</a></p>
+
+                    <div class="divider">or try a demo account</div>
+                    <div class="demo-accounts" id="demo-accounts"></div>
+                    <p class="small muted">All demo accounts use the password <code>demo123</code>.</p>
+                </form>
+
+                <!-- Register -->
+                <form id="register-form" class="stack hidden" novalidate>
+                    <div>
+                        <h1>Create student account</h1>
+                        <p class="muted" style="margin-top:4px">Faculty accounts are created by the project coordinator.</p>
+                    </div>
+                    <div class="form-error hidden" id="register-error" role="alert"></div>
+                    <div class="field"><label for="r-name">Full name</label><input class="input" id="r-name" name="name" required autocomplete="name"></div>
+                    <div class="field"><label for="r-email">Email</label><input class="input" id="r-email" name="email" type="email" required autocomplete="email"></div>
+                    <div class="form-grid">
+                        <div class="field"><label for="r-roll">Roll number</label><input class="input" id="r-roll" name="roll_number"></div>
+                        <div class="field"><label for="r-dept">Department</label><input class="input" id="r-dept" name="department"></div>
+                    </div>
+                    <div class="field"><label for="r-pass">Password</label><input class="input" id="r-pass" name="password" type="password" minlength="6" required autocomplete="new-password"><span class="hint">At least 6 characters</span></div>
+                    <button class="btn btn-primary btn-block" type="submit">Create account</button>
+                    <p class="small muted" style="text-align:center">Already registered? <a href="#" id="show-login">Sign in</a></p>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const { api, icon, esc, HOME } = App;
+        document.getElementById('logo').innerHTML = icon('logo');
+
+        const next = new URLSearchParams(location.search).get('next');
+        const go = (user) => { location.href = next && next.startsWith('/') && !next.startsWith('//') ? next : HOME[user.role]; };
+
+        // Already signed in? Skip the form.
+        api('/auth/me').then(d => go(d.user)).catch(() => {});
+
+        const DEMOS = [
+            ['student@example.com', 'John Doe', 'Student · project in progress'],
+            ['ivy@example.com', 'Ivy Chen', 'Student · no proposal yet'],
+            ['faculty@example.com', 'Dr. Kumar', 'Faculty guide · 4 projects'],
+            ['admin@example.com', 'Project Coordinator', 'Admin · whole department'],
+        ];
+        document.getElementById('demo-accounts').innerHTML = DEMOS.map(([email, name, note]) =>
+            `<button type="button" class="demo-btn" data-email="${email}"><span class="avatar">${esc(App.initials(name))}</span><span><b>${esc(name)}</b><small>${esc(note)}</small></span></button>`).join('');
+
+        async function signIn(email, password, errEl) {
+            errEl.classList.add('hidden');
+            try {
+                const { user } = await api('/auth/login', { method: 'POST', body: { email, password } });
+                go(user);
+            } catch (e) {
+                errEl.textContent = e.message;
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('demo-accounts').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-email]');
+            if (b) signIn(b.dataset.email, 'demo123', document.getElementById('login-error'));
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const f = e.target;
+            if (!f.reportValidity()) return;
+            signIn(f.email.value.trim(), f.password.value, document.getElementById('login-error'));
+        });
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const f = e.target;
+            if (!f.reportValidity()) return;
+            const err = document.getElementById('register-error');
+            err.classList.add('hidden');
+            try {
+                const { user } = await api('/auth/register', { method: 'POST', body: App.values(f) });
+                go(user);
+            } catch (ex) {
+                err.textContent = ex.message;
+                err.classList.remove('hidden');
+            }
+        });
+
+        const toggle = (showRegister) => (e) => {
+            e.preventDefault();
+            document.getElementById('login-form').classList.toggle('hidden', showRegister);
+            document.getElementById('register-form').classList.toggle('hidden', !showRegister);
+        };
+        document.getElementById('show-register').onclick = toggle(true);
+        document.getElementById('show-login').onclick = toggle(false);
+    </script>
+</body>
+</html>
